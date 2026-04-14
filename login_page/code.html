@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>WHERE IS MY BUS — Sign In</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: { extend: {
+        colors: { primary: "#ec5b13", "background-light": "#f8f6f6", "background-dark": "#221610" },
+        fontFamily: { display: ["Public Sans", "sans-serif"] },
+        borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+      }},
+    };
+  </script>
+  <style>body { font-family: "Public Sans", sans-serif; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-0 sm:p-4">
+
+<div class="flex w-full max-w-[1100px] min-h-[680px] bg-white dark:bg-slate-900 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden flex-col md:flex-row">
+
+  <!-- Left branding -->
+  <div class="hidden md:flex md:w-5/12 relative overflow-hidden bg-primary/10 flex-col justify-between p-10"
+       style="background-image:linear-gradient(to bottom,rgba(236,91,19,.55),rgba(34,22,16,.95)),url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAmqoPCCiU3E9ZNXy3NC4Ur6433HvgoJ_psEGi-9GJVvVwIIgOag9DrO3mxobUhZ_beiJzYnGjoTr_rDT0T3bu-QK9pUQu4QH2-d1tb24scJa6W7jtoMFcm0tEt5hXswuK0cCoy9grnwD3WN9KmWcYGJuwJAE4-tcEyNBJjfzWlBSKw6aCXfl-ogesH8Z49AAs3QqASICIjHy9pf0OsgamjF6FU2LpGgSAZBJVgSDaHUsGMLnc7Lkqs9sx41W23-3YPJpFbsCselo');background-size:cover;background-position:center;">
+    <div class="flex items-center gap-3">
+      <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined text-3xl">directions_bus</span></div>
+      <span class="text-white text-xl font-black tracking-tight">WHERE IS MY BUS</span>
+    </div>
+    <div>
+      <h2 class="text-white text-3xl font-extrabold leading-snug mb-3">Track your bus.<br/>In real time.</h2>
+      <p class="text-slate-200 text-sm">Delhi's smartest transit tracker — know exactly where your bus is, right now.</p>
+    </div>
+    <p class="text-white/60 text-xs">50,000+ daily commuters · Delhi NCR</p>
+  </div>
+
+  <!-- Right form -->
+  <div class="flex-1 flex flex-col justify-center items-center p-8 sm:p-12">
+    <div class="w-full max-w-sm">
+
+      <!-- Mobile logo -->
+      <div class="md:hidden flex items-center gap-2 mb-8">
+        <div class="bg-primary p-1.5 rounded-lg text-white"><span class="material-symbols-outlined text-xl">directions_bus</span></div>
+        <span class="font-black text-lg tracking-tight">WHERE IS MY BUS</span>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-8">
+        <button id="tab-signin" onclick="showTab('signin')"
+          class="flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white">
+          Sign In
+        </button>
+        <button id="tab-signup" onclick="showTab('signup')"
+          class="flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- ── SIGN IN ── -->
+      <div id="panel-signin">
+        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Welcome back! Enter your credentials.</p>
+        <form id="signin-form" novalidate class="space-y-4">
+          <div id="signin-error" class="hidden bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-xl"></div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
+            <input id="si-email" type="email" placeholder="Email address"
+              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+          </div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+            <input id="si-password" type="password" placeholder="Password"
+              class="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+            <button type="button" onclick="togglePw('si-password',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <span class="material-symbols-outlined text-xl">visibility</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="si-keep" type="checkbox" class="rounded text-primary"/>
+              <span class="text-slate-600 dark:text-slate-400">Keep me signed in</span>
+            </label>
+          </div>
+          <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+            Sign In <span class="material-symbols-outlined">login</span>
+          </button>
+        </form>
+
+        <div class="flex items-center gap-3 my-5">
+          <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+          <span class="text-xs text-slate-400 font-bold uppercase">or</span>
+          <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+        </div>
+
+        <!-- Google (simulated) -->
+        <button id="google-btn" onclick="googleLogin()"
+          class="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 transition-all min-h-[44px]">
+          <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+
+        <button onclick="guestLogin()"
+          class="w-full mt-3 flex items-center justify-center gap-2 text-slate-500 hover:text-primary font-semibold py-2 text-sm transition-colors min-h-[44px]">
+          <span class="material-symbols-outlined text-lg">person_search</span> Continue as Guest
+        </button>
+
+        <!-- Driver portal link -->
+        <div class="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl text-center">
+          <p class="text-xs text-slate-500 mb-2">Are you a bus driver?</p>
+          <a href="../driver_portal/index.html" class="text-primary font-bold text-sm hover:underline flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-base">steering</span> Open Driver Portal
+          </a>
+        </div>
+      </div>
+
+      <!-- ── SIGN UP ── -->
+      <div id="panel-signup" class="hidden">
+        <p class="text-slate-500 dark:text-slate-400 text-sm mb-5">Create your account to track buses in real time.</p>
+        <form id="signup-form" novalidate class="space-y-3">
+          <div id="signup-error" class="hidden bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-xl"></div>
+          <div id="signup-success" class="hidden bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 text-sm px-4 py-3 rounded-xl"></div>
+
+          <input id="su-name" type="text" placeholder="Full name"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+          <input id="su-email" type="email" placeholder="Email address"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+          <input id="su-phone" type="tel" placeholder="Phone number"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+
+          <!-- City selector -->
+          <div class="relative">
+            <select id="su-city"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 appearance-none">
+              <option value="">Select your city</option>
+              <optgroup label="Available Now">
+                <option value="Delhi">Delhi</option>
+                <option value="Noida">Noida</option>
+                <option value="Gurgaon">Gurgaon</option>
+                <option value="Faridabad">Faridabad</option>
+                <option value="Ghaziabad">Ghaziabad</option>
+              </optgroup>
+              <optgroup label="Coming Soon">
+                <option value="Mumbai" disabled>Mumbai — Coming Soon</option>
+                <option value="Bangalore" disabled>Bangalore — Coming Soon</option>
+                <option value="Chennai" disabled>Chennai — Coming Soon</option>
+                <option value="Hyderabad" disabled>Hyderabad — Coming Soon</option>
+                <option value="Pune" disabled>Pune — Coming Soon</option>
+                <option value="Kolkata" disabled>Kolkata — Coming Soon</option>
+              </optgroup>
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+          </div>
+
+          <div class="relative">
+            <input id="su-password" type="password" placeholder="Create password"
+              class="w-full pl-4 pr-10 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+            <button type="button" onclick="togglePw('su-password',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <span class="material-symbols-outlined text-xl">visibility</span>
+            </button>
+          </div>
+
+          <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+            Create Account <span class="material-symbols-outlined">person_add</span>
+          </button>
+        </form>
+
+        <div class="mt-5 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl text-center">
+          <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Want to drive with us?</p>
+          <a href="../driver_portal/index.html" class="text-primary font-bold text-sm hover:underline flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-base">steering</span> Register as Driver
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme
+  (function(){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.matches) document.documentElement.classList.add('dark');
+    mq.addEventListener('change', e => document.documentElement.classList.toggle('dark', e.matches));
+  })();
+
+  function showTab(t) {
+    document.getElementById('panel-signin').classList.toggle('hidden', t !== 'signin');
+    document.getElementById('panel-signup').classList.toggle('hidden', t !== 'signup');
+    document.getElementById('tab-signin').className = t === 'signin'
+      ? 'flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white'
+      : 'flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400';
+    document.getElementById('tab-signup').className = t === 'signup'
+      ? 'flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white'
+      : 'flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400';
+  }
+
+  function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    const icon = btn.querySelector('.material-symbols-outlined');
+    if (inp.type === 'password') { inp.type = 'text'; icon.textContent = 'visibility_off'; }
+    else { inp.type = 'password'; icon.textContent = 'visibility'; }
+  }
+
+  function guestLogin() {
+    window.location.href = '../live_tracking_map/code.html';
+  }
+
+  function googleLogin() {
+    // Simulated Google login — creates a fake Google account in localStorage
+    const btn = document.getElementById('google-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> Signing in with Google…';
+
+    setTimeout(() => {
+      // Simulate a Google user
+      const googleUser = {
+        id: 'google_' + Date.now(),
+        name: 'Google User',
+        email: 'googleuser@gmail.com',
+        role: 'passenger',
+        city: 'Delhi',
+        photo: null,
+        password: '__google__',
+        createdAt: Date.now(),
+      };
+      const users = JSON.parse(localStorage.getItem('wimb_users') || '[]');
+      const existing = users.find(u => u.email === googleUser.email);
+      if (!existing) { users.push(googleUser); localStorage.setItem('wimb_users', JSON.stringify(users)); }
+      const user = existing || googleUser;
+      const session = { id: user.id, name: user.name, email: user.email, role: user.role, expiresAt: Date.now() + 8*60*60*1000 };
+      localStorage.setItem('wimb_session', JSON.stringify(session));
+      window.location.href = '../user_dashboard/code.html';
+    }, 1200);
+  }
+</script>
+
+<script type="module">
+  import { loginUser, registerUser, saveSession } from '../shared/auth.js';
+
+  // ── Sign In ──────────────────────────────────────────────────────────────
+  document.getElementById('signin-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const email = document.getElementById('si-email').value.trim();
+    const password = document.getElementById('si-password').value;
+    const keep = document.getElementById('si-keep').checked;
+    const errEl = document.getElementById('signin-error');
+    errEl.classList.add('hidden');
+
+    if (!email || !password) {
+      errEl.textContent = 'Please enter your email and password.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const result = loginUser(email, password);
+    if (!result.ok) {
+      errEl.textContent = result.error;
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    saveSession(result.user, keep);
+    // Redirect based on role
+    if (result.user.role === 'driver') {
+      window.location.href = '../driver_portal/index.html';
+    } else {
+      window.location.href = '../user_dashboard/code.html';
+    }
+  });
+
+  // ── Sign Up ──────────────────────────────────────────────────────────────
+  document.getElementById('signup-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const name     = document.getElementById('su-name').value.trim();
+    const email    = document.getElementById('su-email').value.trim();
+    const phone    = document.getElementById('su-phone').value.trim();
+    const city     = document.getElementById('su-city').value;
+    const password = document.getElementById('su-password').value;
+    const errEl    = document.getElementById('signup-error');
+    const okEl     = document.getElementById('signup-success');
+    errEl.classList.add('hidden');
+    okEl.classList.add('hidden');
+
+    if (!name || !email || !phone || !city || !password) {
+      errEl.textContent = 'Please fill in all fields.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (password.length < 6) {
+      errEl.textContent = 'Password must be at least 6 characters.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const result = registerUser({ name, email, phone, city, password, role: 'passenger' });
+    if (!result.ok) {
+      errEl.textContent = result.error;
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    okEl.textContent = 'Account created! You can now sign in.';
+    okEl.classList.remove('hidden');
+    document.getElementById('signup-form').reset();
+    setTimeout(() => showTab('signin'), 1500);
+  });
+</script>
+</body>
+</html>

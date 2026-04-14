@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <title>WHERE IS MY BUS — Dashboard</title>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="layout-container flex h-full grow flex-col">
+        <!-- Header -->
+        <header
+            class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 md:px-10 py-4 bg-white dark:bg-background-dark sticky top-0 z-50">
+            <div class="flex items-center gap-4 text-primary">
+                <div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
+                    <span class="material-symbols-outlined">directions_bus</span>
+                </div>
+                <h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-[-0.015em]">WHERE IS MY BUS</h2>
+            </div>
+            <div class="flex flex-1 justify-end gap-8 items-center">
+                <nav class="hidden md:flex items-center gap-8">
+                    <a class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium leading-normal"
+                        href="../live_tracking_map/code.html">Live Map</a>
+                    <a class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium leading-normal"
+                        href="../route_overview/code.html">Routes</a>
+                    <a class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium leading-normal"
+                        href="../stop_details_eta/code.html">Schedules</a>
+                </nav>
+                <div id="profile-menu-container"></div>
+            </div>
+        </header>
+        <main class="flex flex-1 justify-center py-6 px-4 md:px-10">
+            <div class="layout-content-container flex flex-col max-w-[1200px] flex-1 gap-8">
+                <!-- Welcome Section -->
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                    <div class="flex flex-col gap-1">
+        <h1 class="text-slate-900 dark:text-slate-100 text-3xl font-black leading-tight tracking-tight" id="welcome-heading">
+                            Welcome back!</h1>
+                        <p class="text-slate-500 dark:text-slate-400 text-base font-normal">Your daily commute updates
+                            for today.</p>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <label class="flex flex-col min-w-[320px] h-12 w-full">
+                            <div
+                                class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 focus-within:ring-2 focus-within:ring-primary">
+                                <div class="text-slate-400 dark:text-slate-500 flex items-center justify-center pl-4">
+                                    <span class="material-symbols-outlined text-xl">search</span>
+                                </div>
+                                <input
+                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 pl-2 text-base font-normal leading-normal"
+                                    placeholder="Find a bus by number (e.g. 429)" value="" />
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left & Middle Column -->
+                    <div class="lg:col-span-2 flex flex-col gap-8">
+                        <!-- Active Alerts -->
+                        <section>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2
+                                    class="text-slate-900 dark:text-slate-100 text-xl font-bold flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">campaign</span>
+                                    Active Alerts
+                                </h2>
+                                <button class="text-primary text-sm font-semibold hover:underline min-h-[44px] px-2">View All</button>
+                            </div>
+                            <div class="space-y-3" id="alerts-container">
+                                <!-- Populated by JS -->
+                            </div>
+                        </section>
+                        <!-- Saved Stops & ETAs -->
+                        <section>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2
+                                    class="text-slate-900 dark:text-slate-100 text-xl font-bold flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">bookmark</span>
+                                    Saved Stops
+                                </h2>
+                                <button class="text-primary text-sm font-semibold hover:underline min-h-[44px] px-2">Manage Stops</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div
+                                    class="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 class="text-slate-900 dark:text-slate-100 font-bold">Moolchand Metro
+                                            </h3>
+                                            <p class="text-slate-500 text-xs">Platform 2 • Towards AIIMS</p>
+                                        </div>
+                                        <div
+                                            class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">
+                                            LIVE</div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div
+                                            class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="bg-primary text-white font-bold px-2 py-1 rounded text-xs min-w-[40px] text-center">
+                                                    429</div>
+                                                <span class="text-sm font-medium">Vasant Vihar</span>
+                                            </div>
+                                            <span class="text-primary font-bold text-sm" id="eta-429">4 min</span>
+                                        </div>
+                                        <div
+                                            class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="bg-slate-500 text-white font-bold px-2 py-1 rounded text-xs min-w-[40px] text-center">
+                                                    522</div>
+                                                <span class="text-sm font-medium">New Delhi Stn</span>
+                                            </div>
+                                            <span class="text-slate-600 dark:text-slate-400 font-bold text-sm" id="eta-522">12
+                                                min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 class="text-slate-900 dark:text-slate-100 font-bold">Lajpat Nagar</h3>
+                                            <p class="text-slate-500 text-xs">Bus Bay 4 • Towards Ashram</p>
+                                        </div>
+                                        <div
+                                            class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">
+                                            LIVE</div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div
+                                            class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="bg-primary text-white font-bold px-2 py-1 rounded text-xs min-w-[40px] text-center">
+                                                    724</div>
+                                                <span class="text-sm font-medium">Nehru Place</span>
+                                            </div>
+                                            <span class="text-primary font-bold text-sm" id="eta-724">2 min</span>
+                                        </div>
+                                        <div
+                                            class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="bg-slate-500 text-white font-bold px-2 py-1 rounded text-xs min-w-[40px] text-center">
+                                                    OM-4</div>
+                                                <span class="text-sm font-medium">Badarpur Border</span>
+                                            </div>
+                                            <span class="text-slate-600 dark:text-slate-400 font-bold text-sm" id="eta-om-4">15
+                                                min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <!-- Right Column -->
+                    <div class="flex flex-col gap-8">
+                        <!-- Recent Activity -->
+                        <section>
+                            <h2
+                                class="text-slate-900 dark:text-slate-100 text-xl font-bold mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">history</span>
+                                Recent Activity
+                            </h2>
+                            <div
+                                class="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                                <div id="history-list">
+                                <!-- Populated by JS -->
+                                </div>
+                                <button id="clear-history-btn"
+                                    class="w-full min-h-[44px] text-slate-500 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Clear
+                                    History</button>
+                            </div>
+                        </section>
+                        <!-- Live Map Preview -->
+                        <section>
+                            <h2
+                                class="text-slate-900 dark:text-slate-100 text-xl font-bold mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">map</span>
+                                Map Preview
+                            </h2>
+                            <div
+                                class="relative h-[240px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm group">
+                                <div class="absolute inset-0 bg-slate-200 dark:bg-slate-800 bg-center bg-cover"
+                                    data-alt="Abstract map view of Delhi city grid" data-location="Delhi"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrRxHNz6nF34QtD3Z4gRpw0scxxnvY1coMoiRyonta4ZqZ13Fe98h4nb2UxlUzhIBOfTSVknHOpAIDWfV0gqXTS-dsiNdAFWJH0qhZlKogO_Ydm8iqXFHZRPDUlgtT2al8JlqkrbEHbGby-8CMtlE5jA7A5ZoAHlWlrJqXhbW3n2qFDiLNxIIaXtduZhAa4Hg4J4XWmQW32zG7dPIPpImWqD06RIoapKbSBUIHvFaVal-3yDcGjuScz6jlHlXQJrx4Pcto55LyfYo');">
+                                </div>
+                                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors">
+                                </div>
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <a href="../live_tracking_map/code.html"
+                                        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined">explore</span>
+                                        Open Live Map
+                                    </a>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Footer / Bottom Navigation for Mobile -->
+        <footer
+            class="md:hidden sticky bottom-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark py-3 px-6 flex justify-around items-center">
+            <a class="flex flex-col items-center gap-1 text-primary min-h-[44px] min-w-[44px] justify-center" href="../user_dashboard/code.html">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-[10px] font-bold">Home</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../live_tracking_map/code.html">
+                <span class="material-symbols-outlined">map</span>
+                <span class="text-[10px] font-bold">Map</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../route_overview/code.html">
+                <span class="material-symbols-outlined">directions_bus</span>
+                <span class="text-[10px] font-bold">Buses</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../login_page/code.html">
+                <span class="material-symbols-outlined">person</span>
+                <span class="text-[10px] font-bold">Profile</span>
+            </a>
+        </footer>
+    </div>
+    <script>
+  (function() {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.matches) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    mq.addEventListener('change', e => {
+      if (e.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    });
+  })();
+</script>
+<script type="module">
+        import { getActiveNotifications } from '../shared/notifications.js';
+        import { addToHistory, clearHistory, saveHistory, loadHistory } from '../shared/history.js';
+        import { initProfileMenu } from '../shared/header.js';
+
+        initProfileMenu();
+
+        // Personalise welcome
+        const sess = (() => { try { return JSON.parse(localStorage.getItem('wimb_session')||'null'); } catch { return null; } })();
+        if (sess && sess.name) {
+          const el = document.getElementById('welcome-heading');
+          if (el) el.textContent = `Welcome back, ${sess.name.split(' ')[0]}!`;
+        }
+        function updateDashboardEtas() {
+            fetch('http://localhost:8000/buses')
+                .then(res => res.json())
+                .then(data => {
+                    Object.values(data).forEach(bus => {
+                        const routeId = bus.route.toLowerCase();
+                        const etaEl = document.getElementById(`eta-${routeId}`);
+                        if (etaEl) {
+                            const eta = bus.eta;
+                            etaEl.innerText = eta + ' min';
+                            etaEl.className = eta <= 5
+                                ? 'text-primary font-bold text-sm'
+                                : 'text-slate-600 dark:text-slate-400 font-bold text-sm';
+                        }
+                    });
+                })
+                .catch(err => console.error('Error fetching dashboard bus data:', err));
+        }
+
+        updateDashboardEtas();
+        setInterval(updateDashboardEtas, 3000);
+
+        // ── Task 9.2: Active notifications ──────────────────────────────────────
+        const DEMO_NOTIFICATIONS = [
+            {
+                route: '429',
+                description: 'Diversion via Outer Ring Road due to road maintenance near Nehru Place.',
+                issued_at: Date.now() - 2 * 60 * 1000,
+                resolved: false,
+                category: 'Warning'
+            },
+            {
+                route: 'All Routes',
+                description: 'Buses will run on a Sunday schedule this Friday for Republic Day.',
+                issued_at: Date.now() - 60 * 60 * 1000,
+                resolved: false,
+                category: 'Info'
+            }
+        ];
+
+        function timeElapsed(issuedAt) {
+            const diffMs = Date.now() - issuedAt;
+            const mins = Math.floor(diffMs / 60000);
+            if (mins < 60) return `${mins}m ago`;
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return `${hrs}h ago`;
+            return `${Math.floor(hrs / 24)}d ago`;
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('alerts-container');
+            if (!container) return;
+            container.innerHTML = '';
+            if (notifications.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-sm p-4">No active alerts.</p>';
+                return;
+            }
+            notifications.forEach(n => {
+                const isWarning = n.category === 'Warning';
+                const el = document.createElement('div');
+                el.className = isWarning
+                    ? 'flex items-center gap-4 p-4 rounded-xl bg-orange-50 dark:bg-primary/10 border border-primary/20'
+                    : 'flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800';
+                el.innerHTML = `
+                    <div class="flex-shrink-0 size-10 rounded-full ${isWarning ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center ${isWarning ? 'text-white' : 'text-slate-600 dark:text-slate-300'}">
+                        <span class="material-symbols-outlined">${isWarning ? 'warning' : 'info'}</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-slate-900 dark:text-slate-100 font-bold">Route ${n.route}</p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">${n.description}</p>
+                    </div>
+                    <div class="text-xs text-slate-400 font-medium">${timeElapsed(n.issued_at)}</div>`;
+                container.appendChild(el);
+            });
+        }
+
+        const active = getActiveNotifications(DEMO_NOTIFICATIONS, Date.now());
+        renderNotifications(active);
+
+        // ── Task 9.3: Search bar navigation ─────────────────────────────────────
+        const searchInput = document.querySelector('input[placeholder]');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    const val = searchInput.value.trim();
+                    if (val) {
+                        window.location.href = `../bus_search/code.html?q=${encodeURIComponent(val)}`;
+                    }
+                }
+            });
+        }
+
+        // ── Task 9.4: Recent activity history ───────────────────────────────────
+        let history = loadHistory();
+
+        function renderHistory(entries) {
+            const container = document.getElementById('history-list');
+            if (!container) return;
+            container.innerHTML = '';
+            if (entries.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-sm p-4">No recent activity.</p>';
+                return;
+            }
+            entries.slice(0, 10).forEach(entry => {
+                const el = document.createElement('div');
+                el.className = 'p-4 border-b border-slate-50 dark:border-slate-800 flex items-start gap-3';
+                el.innerHTML = `
+                    <div class="size-8 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                        <span class="material-symbols-outlined text-sm">${entry.icon || 'history'}</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold">${entry.label}</p>
+                        <p class="text-xs text-slate-500">${entry.detail || ''}</p>
+                    </div>`;
+                container.appendChild(el);
+            });
+        }
+
+        renderHistory(history);
+
+        const clearBtn = document.getElementById('clear-history-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                history = clearHistory();
+                saveHistory(history);
+                renderHistory(history);
+            });
+        }
+    </script>
+</body>
+
+</html>

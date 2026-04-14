@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* P21: visually distinct stop state classes — no two share the same styling */
+        .stop-passed  { opacity: 0.6; }
+        .stop-current { border-left: 4px solid #ec5b13; background: rgba(236,91,19,0.06); }
+        .stop-upcoming { opacity: 1; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark/50 px-6 py-4 sticky top-0 z-10 backdrop-blur-md">
+<div class="flex items-center gap-4">
+<div class="bg-primary/10 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined text-2xl">directions_bus</span>
+</div>
+<div>
+<h2 id="route-title" class="text-lg font-bold leading-tight tracking-tight">Route 534: North-South Express</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400">Transit Pro • Admin Console</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div id="profile-menu-container"></div>
+<!-- P25: Edit Route button — shown only to admin users by JS -->
+<button id="edit-route-btn" class="hidden flex items-center justify-center rounded-xl min-h-[44px] px-4 bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity">
+                    Edit Route
+                </button>
+</div>
+</header>
+<main class="max-w-7xl mx-auto w-full p-6 lg:p-8">
+<!-- P24: Service alert panel — shown only when an active alert exists -->
+<div id="service-alert-panel" class="hidden mb-6 p-4 rounded-xl border-2 border-orange-400 bg-orange-50 dark:bg-orange-900/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-orange-500 text-xl mt-0.5">warning</span>
+<p id="service-alert-text" class="text-sm font-medium text-orange-800 dark:text-orange-200"></p>
+</div>
+<!-- P25: Edit Route interface — shown only to admin users -->
+<div id="edit-route-panel" class="hidden mb-6 p-6 rounded-xl border border-primary bg-primary/5 dark:bg-primary/10">
+<h3 class="text-lg font-bold mb-4 text-primary">Edit Route</h3>
+<div class="flex flex-col gap-3">
+<label class="text-sm font-medium">Route Name
+<input type="text" id="edit-route-name" class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm" placeholder="e.g. Route 534"/>
+</label>
+<label class="text-sm font-medium">Stops (comma-separated)
+<input type="text" id="edit-route-stops" class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm" placeholder="Stop A, Stop B, Stop C"/>
+</label>
+<button class="self-start rounded-lg px-4 py-2 bg-primary text-white text-sm font-bold hover:opacity-90 transition-opacity">Save Changes</button>
+</div>
+</div>
+<!-- P22: Trip performance metrics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">On-Time Performance</p>
+<span class="material-symbols-outlined text-primary">schedule</span>
+</div>
+<p id="metric-ontime" class="text-3xl font-bold">94.2%</p>
+<div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+0.4% vs last week</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Avg Delay</p>
+<span class="material-symbols-outlined text-primary">speed</span>
+</div>
+<p id="metric-delay" class="text-3xl font-bold">+2.5m</p>
+<div class="flex items-center gap-1 text-orange-500 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span>-0.2% vs last week</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Load</p>
+<span class="material-symbols-outlined text-primary">group</span>
+</div>
+<p id="metric-occupancy" class="text-3xl font-bold">65%</p>
+<div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+5% occupancy</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-bold">Live Progress</h3>
+<span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wider">Active Trip #882</span>
+</div>
+<div class="relative">
+<div class="absolute left-[19px] top-4 bottom-4 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
+<!-- P20/P21: Stops rendered dynamically by JS -->
+<div id="stop-list"></div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm h-80 relative">
+<div class="absolute inset-0 bg-slate-200 dark:bg-slate-800">
+<img class="w-full h-full object-cover opacity-80 dark:opacity-60 grayscale hover:grayscale-0 transition-all duration-500" data-alt="Detailed map showing transit route through city streets" data-location="New York" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCM4bzw1MY7QXuAm1xkLKr1RJ7tc_kZerM4YUuxnKqLxZBZX1wjLf2ZqbOQ2n8HPICuJ4ywrBnxjJDSAhyXI5hNmTu0qK4gWxuWF_VnvVs_5FV-eBYaJD9HkahTStkJHBLGyjExVpiR7lhHpIwGal_BsEmlF2f5eMPydi4J8d7U5JKH0GadxVg61wy3aZ13AJhKAf1BonIqTI1PLkDS7mAlE-FwCcJfSUNaB0jqfWD2QqQ7xgodY4xKH-v0fvf-8vPJgXCya5ZyJs0"/>
+</div>
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center animate-pulse">
+<div class="w-4 h-4 bg-primary rounded-full shadow-lg"></div>
+</div>
+</div>
+<div class="absolute bottom-4 left-4 right-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-4 py-3 rounded-lg flex items-center justify-between border border-slate-200 dark:border-slate-800">
+<span class="text-xs font-bold uppercase text-slate-500">Live Map View</span>
+<span class="material-symbols-outlined text-primary">open_in_full</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<h4 class="font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">error</span>
+                            Recent Alerts
+                        </h4>
+<div class="space-y-4">
+<div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border-l-4 border-orange-500">
+<p class="text-sm font-bold">Heavy Traffic</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Lexington Ave roadworks causing minor delays.</p>
+</div>
+<div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border-l-4 border-slate-400">
+<p class="text-sm font-bold">Weather Warning</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Rain predicted for next 2 hours. Driving caution advised.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<nav class="mt-12 flex items-center justify-center gap-2">
+<div class="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
+<a class="flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold bg-white dark:bg-slate-900 shadow-sm" href="../user_dashboard/code.html">
+<span class="material-symbols-outlined text-primary text-xl">dashboard</span>
+                        Dashboard
+                    </a>
+<a class="flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-primary transition-colors" href="../live_tracking_map/code.html">
+<span class="material-symbols-outlined text-xl">map</span>
+                        Live Map
+                    </a>
+<a class="flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-primary transition-colors" href="../login_page/code.html">
+<span class="material-symbols-outlined text-xl">settings</span>
+                        Settings
+                    </a>
+</div>
+</nav>
+</main>
+</div>
+<!-- Bottom Navigation for Mobile -->
+<nav class="md:hidden sticky bottom-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark py-3 px-6 flex justify-around items-center z-50">
+<a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../user_dashboard/code.html">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../live_tracking_map/code.html">
+<span class="material-symbols-outlined">map</span>
+<span class="text-[10px] font-bold">Map</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary min-h-[44px] min-w-[44px] justify-center" href="../bus_search/code.html">
+<span class="material-symbols-outlined">directions_bus</span>
+<span class="text-[10px] font-bold">Buses</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../login_page/code.html">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</nav>
+<script>
+  (function() {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.matches) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    mq.addEventListener('change', e => {
+      if (e.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    });
+  })();
+</script>
+<script>
+    // URL param handling moved to module script below
+</script>
+<script type="module">
+import { initProfileMenu } from '../shared/header.js';
+// ─── Demo data for Route 534 ───────────────────────────────────────────────
+
+/** @typedef {{ name: string, scheduled: string, actual: string|null, status: "Passed"|"Current"|"Upcoming", actual_departure_time: string|null }} RouteStop */
+
+/** @type {RouteStop[]} */
+const stops = [
+  { name: "Anand Vihar",   scheduled: "09:00 AM", actual: "09:01 AM", status: "Passed",   actual_departure_time: "2024-01-15T09:01:00" },
+  { name: "Karkardooma",   scheduled: "09:12 AM", actual: "09:14 AM", status: "Passed",   actual_departure_time: "2024-01-15T09:14:00" },
+  { name: "Preet Vihar",   scheduled: "09:22 AM", actual: "09:22 AM", status: "Current",  actual_departure_time: null },
+  { name: "Nehru Place",   scheduled: "09:40 AM", actual: null,       status: "Upcoming", actual_departure_time: null },
+];
+
+// P23: ensure every stop that is "Passed" has status="Passed" and a non-null actual_departure_time
+stops.forEach(stop => {
+  if (stop.status === "Passed") {
+    stop.status = "Passed";
+    if (!stop.actual_departure_time) {
+      stop.actual_departure_time = new Date().toISOString();
+    }
+  }
+});
+
+const tripMetrics = {
+  onTimePerformance: 94.2,   // %
+  avgDelayMinutes: 2.5,       // minutes
+  occupancyPercent: 65,       // %
+};
+
+const serviceAlert = {
+  active: true,
+  text: "Heavy traffic near Karkardooma due to roadworks. Expect minor delays of 2–5 minutes.",
+};
+
+// ─── P20: Render stop list ─────────────────────────────────────────────────
+function renderStops() {
+  const container = document.getElementById("stop-list");
+  if (!container) return;
+  container.innerHTML = stops.map((stop, i) => {
+    const isLast = i === stops.length - 1;
+    const pb = isLast ? "" : "pb-10";
+
+    // P21: assign distinct CSS class per category
+    let stateClass, iconHtml, nameClass, timingHtml;
+    if (stop.status === "Passed") {
+      stateClass = "stop-passed";
+      iconHtml = `<div class="z-10 bg-emerald-500 rounded-full h-10 w-10 flex items-center justify-center ring-4 ring-white dark:ring-slate-900 shadow-sm">
+        <span class="material-symbols-outlined text-white text-xl">check</span></div>`;
+      nameClass = "text-lg font-bold text-slate-900 dark:text-slate-100";
+      timingHtml = `<p class="text-slate-500 dark:text-slate-400">Scheduled: ${stop.scheduled} · Actual: ${stop.actual}</p>
+        <div class="mt-2 text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded w-fit">PASSED</div>`;
+    } else if (stop.status === "Current") {
+      stateClass = "stop-current";
+      iconHtml = `<div class="z-10 bg-primary rounded-full h-10 w-10 flex items-center justify-center ring-4 ring-primary/20 shadow-[0_0_15px_rgba(236,91,19,0.4)]">
+        <span class="material-symbols-outlined text-white text-xl filled-icon">directions_bus</span></div>`;
+      nameClass = "text-lg font-bold text-primary";
+      timingHtml = `<p class="text-slate-500 dark:text-slate-400">Scheduled: ${stop.scheduled} · Arriving Now</p>
+        <div class="mt-2 text-xs font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded w-fit">CURRENT</div>`;
+    } else {
+      stateClass = "stop-upcoming";
+      iconHtml = `<div class="z-10 bg-slate-200 dark:bg-slate-800 rounded-full h-10 w-10 flex items-center justify-center ring-4 ring-white dark:ring-slate-900">
+        <span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-xl">pin</span></div>`;
+      nameClass = "text-lg font-bold text-slate-400 dark:text-slate-600";
+      timingHtml = `<p class="text-slate-400 dark:text-slate-600">Scheduled: ${stop.scheduled} · Actual: —</p>`;
+    }
+
+    return `<div class="relative flex gap-6 ${pb} rounded-lg px-2 ${stateClass}">
+      ${iconHtml}
+      <div class="flex flex-col pt-1">
+        <h4 class="${nameClass}">${stop.name}</h4>
+        ${timingHtml}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ─── P22: Render trip metrics ──────────────────────────────────────────────
+function renderMetrics() {
+  const ontime = document.getElementById("metric-ontime");
+  const delay  = document.getElementById("metric-delay");
+  const occ    = document.getElementById("metric-occupancy");
+  if (ontime) ontime.textContent = `${tripMetrics.onTimePerformance}%`;
+  if (delay)  delay.textContent  = `+${tripMetrics.avgDelayMinutes}m`;
+  if (occ)    occ.textContent    = `${tripMetrics.occupancyPercent}%`;
+}
+
+// ─── P24: Render service alert ─────────────────────────────────────────────
+function renderAlert() {
+  const panel = document.getElementById("service-alert-panel");
+  const text  = document.getElementById("service-alert-text");
+  if (!panel || !text) return;
+  if (serviceAlert.active && serviceAlert.text) {
+    text.textContent = serviceAlert.text;
+    panel.classList.remove("hidden");
+  }
+}
+
+// ─── P25: Gate Edit Route to admin users ──────────────────────────────────
+function applyAdminGate() {
+  let session = null;
+  try {
+    const raw = localStorage.getItem("session");
+    if (raw) session = JSON.parse(raw);
+  } catch (_) { /* localStorage unavailable or invalid JSON */ }
+
+  const isAdmin = session && session.role === "admin";
+  const btn   = document.getElementById("edit-route-btn");
+  const panel = document.getElementById("edit-route-panel");
+
+  if (isAdmin) {
+    if (btn) {
+      btn.classList.remove("hidden");
+      btn.addEventListener("click", () => {
+        if (panel) panel.classList.toggle("hidden");
+      });
+    }
+  } else {
+    // Non-admin: ensure button and panel are hidden (already hidden by default)
+    if (btn)   btn.classList.add("hidden");
+    if (panel) panel.classList.add("hidden");
+  }
+}
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────
+renderStops();
+renderMetrics();
+renderAlert();
+applyAdminGate();
+
+// Also handle URL params for route title (preserve existing behaviour)
+const params = new URLSearchParams(window.location.search);
+const from = params.get("from");
+const to   = params.get("to");
+if (from || to) {
+  const titleEl = document.getElementById("route-title");
+  if (titleEl) {
+    const fromDisplay = from ? from.replace(/&$/, "") : "Unknown";
+    const toDisplay   = to   ? to.replace(/&$/, "")   : "Unknown";
+    titleEl.innerText = `${fromDisplay} to ${toDisplay}`;
+  }
+}
+</script>
+</body></html>

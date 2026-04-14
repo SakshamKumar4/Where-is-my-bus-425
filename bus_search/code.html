@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Public Sans", sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Header / TopNavBar -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 md:px-10 py-4 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<span class="material-symbols-outlined text-4xl">directions_bus</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">WHERE IS MY BUS</h2>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="../user_dashboard/code.html">Home</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="../stop_details_eta/code.html">Stops</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="../live_tracking_map/code.html">Live Map</a>
+</nav>
+<div id="profile-menu-container"></div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center">
+<div class="w-full max-w-[960px] px-4 py-8 md:py-12">
+<!-- Hero Section & Search -->
+<div class="flex flex-col gap-6 mb-12">
+<div class="flex flex-col gap-2">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl md:text-5xl font-black tracking-tight">Search Bus</h1>
+<p class="text-slate-500 dark:text-slate-400 text-lg">Find your next ride across the city</p>
+</div>
+<div class="flex flex-col md:flex-row gap-4 w-full bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+<label class="flex flex-col flex-1 gap-2">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 ml-1">From</span>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary">location_on</span>
+<input id="search-from" class="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Enter source location" value="Anand Vihar"/>
+</div>
+</label>
+<div class="flex items-center justify-center md:pt-6">
+<button class="bg-primary/10 text-primary p-2 rounded-full hover:bg-primary/20 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+<span class="material-symbols-outlined">swap_horiz</span>
+</button>
+</div>
+<label class="flex flex-col flex-1 gap-2">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 ml-1">To</span>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary">near_me</span>
+<input id="search-to" class="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Enter destination" value=""/>
+</div>
+</label>
+<div class="md:pt-6">
+<button class="w-full md:w-auto h-full px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2" onclick="handleSearch()">
+<span class="material-symbols-outlined">search</span>
+                                Search
+                            </button>
+</div>
+</div>
+</div>
+<!-- Recent Searches -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">Recent Searches</h2>
+<button id="clear-history-btn" class="text-primary font-semibold text-sm hover:underline">Clear all</button>
+</div>
+<div id="recent-searches-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Populated dynamically -->
+</div>
+</section>
+<!-- Popular Destinations -->
+<section class="mb-12">
+<h2 class="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight mb-6">Popular Destinations</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Dest 1 -->
+<div class="group relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer">
+<img class="absolute h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="India Gate landmark in Delhi during sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjCFm-oPafWxgxEHqg2Bd9032upAqVUq6LDEfWOQO_nN-zZOjy6NI6X0V9ZiDKLr61P-W6ldE2ml5wGIKyMMwSkFsqENhad8pwYYEmE3__0L1Va6G9sxcDErpWYcDMlFbP1nCGhX8znYgM5idpmeQa2IfCZxu2zwqhnvUwhLYSFBJJBShmLJBtUIrqiNrTxFpyyoj6QB7N9qQPdg5g10qtj9R_5e_5AUgVAiXRF80sJmbI3uj7wVXiUrlK48qAzMQZ0G423Klcwvg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="text-lg font-bold">India Gate</p>
+<p class="text-xs text-white/70">15+ Routes</p>
+</div>
+</div>
+<!-- Dest 2 -->
+<div class="group relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer">
+<img class="absolute h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Red Fort historical site in Delhi" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYMPrEevaPSE7V0JuUjXW0EGtzRIzInIbr_4BoCv_njp9YI9gwQr-9wjwxFl4_HYijSxjpo8Y6cvnF3FSGbnRDONts745gAgvZvtZ6idT1y8XrS3zhtHeS2QtGkv9afQCR7x6kXyBy99YZaWAKSZVItFQUoCVeE0kHXvZxYHh2XEoNg6CZNzVtHyrQtyhMiJajp89nVDnZSUw_arbmS1uGgNFccmYpu48zQ9ARPlqVjaGoP0JAxJPk2lWCURdc_jLfhvu9WTejJY8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="text-lg font-bold">Red Fort</p>
+<p class="text-xs text-white/70">22+ Routes</p>
+</div>
+</div>
+<!-- Dest 3 -->
+<div class="group relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer">
+<img class="absolute h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Lotus Temple architecture in Delhi" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcXyS4T3cgcbigwcp6oi9RQSJSWUHcubBX-Jo20cICNVoT5n0u0lE9bbqwOn_BboWYVlb1nqbeHbikoeGO7OmJ1qkdhclB5xHVah3IPZQW4txcyluuy8UlVVvIIQyM0rvzKAAcVCkuX52qAdLuRg9_PxpwAn0PtscXEijUndRGUiR0BeoKp7nkUv_GKFFqpxvYAKwSGWbZy_2ybLz6wAPbyQLuywK5_RtfX-YJRYmtHn075-iutKTbMX9mk6FDBA0cUhkd7B_BmqU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="text-lg font-bold">Lotus Temple</p>
+<p class="text-xs text-white/70">10+ Routes</p>
+</div>
+</div>
+<!-- Dest 4 -->
+<div class="group relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer">
+<img class="absolute h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Qutub Minar ancient tower in Delhi" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJNB5XANgCAeDBP6specwTz7bmgqnAXdaZ2vs-R6gb4dQ3T8m6NEHTjeJHEDKqsvd4p4S49-BUSdQO_oiFvxwNi1aBbYpduyN54b-bKOtPF0J5w7Cel48OYq0oNrrUq78GZFj4tbr_8YPEEo_IF7mheU2VKFD5RyPh6TrxWATyAIni0Gxi3EHAFmUOJ8s9S3-LfsxqK94WQUGVrlUXdoPGQ0XVAXc1fDLF0sPw_v2wzogSn22hRErlbyrw_2j7oy68PWwfsYX1wSo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="text-lg font-bold">Qutub Minar</p>
+<p class="text-xs text-white/70">18+ Routes</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Map Placeholder -->
+<section class="mb-12">
+<div class="w-full h-64 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 relative">
+<img class="w-full h-full object-cover opacity-50 dark:opacity-30" data-alt="Abstract map view of a city grid" data-location="Delhi" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC96W18eLE_W6DoTscYY7-I4lBp6fM5wPxuFE1A54oqWGLOyjg0HROfloo9-hevbzwqK_z2lqaECu1Iz-EP63JIr0NCPLRVWhAEwSZXrU7AhJCJhGLpvAdH-pvyE1IQJEchxHRVZJQZuKCO7e5Ibh7vEiVjNlgpkzkPXJ8crYAzVRgyQ5-3m_A7As4ECRvA0a58cggc_6-eKbpL1pAMaST53rmohf-cEXE1jYJAAlmtB6MjlBhdDiavM6hQGznuAuGunwYBVKNlwZE"/>
+<div class="absolute inset-0 flex items-center justify-center bg-white/40 dark:bg-slate-900/40 backdrop-blur-[2px]">
+<div class="text-center px-6">
+<span class="material-symbols-outlined text-primary text-4xl mb-2">map</span>
+<p class="font-bold text-slate-900 dark:text-slate-100">Explore Route Map</p>
+<p class="text-sm text-slate-600 dark:text-slate-400">View live bus positions and stop details</p>
+<button class="mt-4 px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full text-sm font-bold" onclick="window.location.href='../live_tracking_map/code.html'">Open Interactive Map</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="border-t border-slate-200 dark:border-slate-800 py-10 px-6 bg-white dark:bg-background-dark">
+<div class="max-w-[960px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">directions_bus</span>
+<span class="font-bold text-slate-900 dark:text-white">WHERE IS MY BUS © 2024</span>
+</div>
+<div class="flex gap-8">
+<a class="text-slate-500 hover:text-primary transition-colors text-sm" href="#">Terms</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-sm" href="#">Privacy</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-sm" href="#">Support</a>
+</div>
+</div>
+</footer>
+<!-- Bottom Navigation for Mobile -->
+<nav class="md:hidden sticky bottom-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark py-3 px-6 flex justify-around items-center z-50">
+<a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../user_dashboard/code.html">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../live_tracking_map/code.html">
+<span class="material-symbols-outlined">map</span>
+<span class="text-[10px] font-bold">Map</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary min-h-[44px] min-w-[44px] justify-center" href="../bus_search/code.html">
+<span class="material-symbols-outlined">directions_bus</span>
+<span class="text-[10px] font-bold">Buses</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../login_page/code.html">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</nav>
+</div>
+<script>
+  (function() {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.matches) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    mq.addEventListener('change', e => {
+      if (e.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    });
+  })();
+</script>
+<script type="module">
+  import { filterStops } from '../shared/autocomplete.js';
+  import { addToHistory, clearHistory, saveHistory, loadHistory } from '../shared/history.js';
+  import { initProfileMenu } from '../shared/header.js';
+
+  initProfileMenu();
+
+  // ── Route data (mirrors backend) ──────────────────────────────────────────
+  const ROUTES = [
+    { number: '534', stops: ['Anand Vihar', 'Karkardooma', 'Preet Vihar', 'Nehru Place'] },
+    { number: '429', stops: ['Karkardooma', 'Laxmi Nagar', 'AIIMS'] },
+    { number: '522', stops: ['Connaught Place', 'Patel Nagar', 'Lajpat Nagar'] },
+    { number: '724', stops: ['Kashmere Gate', 'Civil Lines', 'New Delhi Stn', 'Mehrauli'] },
+    { number: 'OM-4', stops: ['Sarita Vihar', 'Tughlakabad', 'Badarpur Border'] },
+  ];
+
+  const ALL_STOPS = [...new Set(ROUTES.flatMap(r => r.stops))].map(name => ({ name }));
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let history = loadHistory();
+
+  // ── Task 6.4: Pre-populate from ?q= query param ───────────────────────────
+  const qParam = new URLSearchParams(window.location.search).get('q');
+  if (qParam) {
+    document.getElementById('search-from').value = qParam;
+  }
+
+  // ── Task 6.1: Search logic ────────────────────────────────────────────────
+  function findRoutes(from, to) {
+    const fromLower = from.toLowerCase();
+    const toLower = to ? to.toLowerCase() : null;
+
+    return ROUTES.filter(route => {
+      const stopsLower = route.stops.map(s => s.toLowerCase());
+      const hasFrom = stopsLower.some(s => s.includes(fromLower));
+      if (!hasFrom) return false;
+      if (!toLower) return true;
+      return stopsLower.some(s => s.includes(toLower));
+    });
+  }
+
+  function renderResults(results, from, to) {
+    // Remove any previous results section
+    const existing = document.getElementById('search-results');
+    if (existing) existing.remove();
+
+    const section = document.createElement('section');
+    section.id = 'search-results';
+    section.className = 'mb-12';
+
+    if (results.length === 0) {
+      section.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center">
+          <span class="material-symbols-outlined text-4xl text-slate-400 mb-3 block">search_off</span>
+          <p class="text-slate-900 dark:text-slate-100 font-bold text-lg mb-1">No routes found</p>
+          <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">No routes pass through <strong>${from}</strong>${to ? ` connecting to <strong>${to}</strong>` : ''}.</p>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Nearby stops you can try: <span class="text-primary font-semibold">${ALL_STOPS.slice(0, 4).map(s => s.name).join(', ')}</span></p>
+        </div>`;
+    } else {
+      const cards = results.map(route => `
+        <div class="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+          <div class="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-lg shrink-0">${route.number}</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-slate-900 dark:text-slate-100 font-bold">Route ${route.number}</p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm truncate">${route.stops.join(' → ')}</p>
+          </div>
+          <a href="../route_overview/code.html?route=${encodeURIComponent(route.number)}&from=${encodeURIComponent(from)}${to ? '&to=' + encodeURIComponent(to) : ''}"
+             class="shrink-0 px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:brightness-110 transition-all">
+            View
+          </a>
+        </div>`).join('');
+
+      section.innerHTML = `
+        <h2 class="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight mb-4">Results</h2>
+        <div class="flex flex-col gap-3">${cards}</div>`;
+    }
+
+    // Insert before Recent Searches section
+    const recentSection = document.querySelector('section');
+    recentSection.parentNode.insertBefore(section, recentSection);
+  }
+
+  function showConnectivityError(from, to) {
+    const existing = document.getElementById('search-results');
+    if (existing) existing.remove();
+
+    const section = document.createElement('section');
+    section.id = 'search-results';
+    section.className = 'mb-12';
+    section.innerHTML = `
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 flex items-start gap-4">
+        <span class="material-symbols-outlined text-red-500 text-2xl shrink-0">wifi_off</span>
+        <div>
+          <p class="font-bold text-red-700 dark:text-red-400">Connection error</p>
+          <p class="text-red-600 dark:text-red-300 text-sm mt-1">Could not reach the server. Showing local results instead.</p>
+        </div>
+      </div>`;
+
+    const recentSection = document.querySelector('section');
+    recentSection.parentNode.insertBefore(section, recentSection);
+
+    // Retain input values (already in DOM, but ensure they stay)
+    document.getElementById('search-from').value = from;
+    document.getElementById('search-to').value = to;
+  }
+
+  async function handleSearch() {
+    const from = document.getElementById('search-from').value.trim();
+    const to = document.getElementById('search-to').value.trim();
+    if (!from) return;
+
+    // Try backend within 2 seconds; fall back to local data on failure
+    let backendOk = false;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch('http://localhost:8000/buses', { signal: controller.signal });
+      clearTimeout(timeout);
+      backendOk = res.ok;
+    } catch (_) {
+      // backend unreachable — use local data but show connectivity notice
+      showConnectivityError(from, to);
+    }
+
+    const results = findRoutes(from, to);
+    renderResults(results, from, to);
+
+    // Save to history on completed search
+    if (from) {
+      history = addToHistory({ from, to, timestamp: Date.now() }, history);
+      saveHistory(history);
+      renderHistory();
+    }
+  }
+
+  // Expose for inline onclick
+  window.handleSearch = handleSearch;
+
+  // ── Task 6.2: Autocomplete ────────────────────────────────────────────────
+  function setupAutocomplete(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    let dropdown = null;
+
+    function removeDropdown() {
+      if (dropdown) { dropdown.remove(); dropdown = null; }
+    }
+
+    input.addEventListener('input', () => {
+      removeDropdown();
+      const query = input.value;
+      const suggestions = filterStops(ALL_STOPS, query);
+      if (suggestions.length === 0) return;
+
+      dropdown = document.createElement('ul');
+      dropdown.className = 'absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden';
+
+      suggestions.forEach(stop => {
+        const li = document.createElement('li');
+        li.textContent = stop.name;
+        li.className = 'px-4 py-3 text-sm text-slate-800 dark:text-slate-200 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors';
+        li.addEventListener('mousedown', e => {
+          e.preventDefault();
+          input.value = stop.name;
+          removeDropdown();
+        });
+        dropdown.appendChild(li);
+      });
+
+      // The input is inside a .relative.group wrapper
+      input.parentElement.appendChild(dropdown);
+    });
+
+    input.addEventListener('blur', () => setTimeout(removeDropdown, 150));
+  }
+
+  setupAutocomplete('search-from');
+  setupAutocomplete('search-to');
+
+  // ── Task 6.3: Recent search history ──────────────────────────────────────
+  function timeAgo(ts) {
+    const mins = Math.round((Date.now() - ts) / 60000);
+    if (mins < 60) return `${mins}M AGO`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}H AGO`;
+    return `${Math.round(hrs / 24)}D AGO`;
+  }
+
+  function renderHistory() {
+    const container = document.getElementById('recent-searches-list');
+    if (!container) return;
+
+    if (history.length === 0) {
+      container.innerHTML = '<p class="text-slate-500 dark:text-slate-400 text-sm col-span-2">No recent searches.</p>';
+      return;
+    }
+
+    container.innerHTML = history.map((entry, i) => `
+      <div class="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow">
+        <div class="h-16 w-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
+          <span class="material-symbols-outlined text-3xl">history</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between items-start">
+            <p class="text-slate-900 dark:text-slate-100 font-bold truncate">${entry.from}${entry.to ? ' → ' + entry.to : ''}</p>
+            <span class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-bold shrink-0 ml-2">${timeAgo(entry.timestamp)}</span>
+          </div>
+          <p class="text-slate-500 dark:text-slate-400 text-sm truncate">${entry.from}${entry.to ? ' to ' + entry.to : ''}</p>
+          <button class="mt-2 text-primary text-xs font-bold flex items-center gap-1 hover:gap-2 transition-all repeat-search-btn" data-index="${i}">
+            REPEAT SEARCH <span class="material-symbols-outlined text-xs">arrow_forward</span>
+          </button>
+        </div>
+      </div>`).join('');
+
+    container.querySelectorAll('.repeat-search-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const entry = history[+btn.dataset.index];
+        document.getElementById('search-from').value = entry.from;
+        document.getElementById('search-to').value = entry.to || '';
+      });
+    });
+  }
+
+  // Wire "Clear all" button
+  document.getElementById('clear-history-btn').addEventListener('click', () => {
+    history = clearHistory();
+    saveHistory(history);
+    renderHistory();
+  });
+
+  // Initial render
+  renderHistory();
+</script>
+</body></html>

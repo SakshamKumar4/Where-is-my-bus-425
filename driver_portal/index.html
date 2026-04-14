@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>WHERE IS MY BUS — Driver Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: { extend: {
+        colors: { primary: "#ec5b13", "background-light": "#f8f6f6", "background-dark": "#221610" },
+        fontFamily: { display: ["Public Sans", "sans-serif"] },
+      }},
+    };
+  </script>
+  <style>body { font-family: "Public Sans", sans-serif; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined">steering</span></div>
+    <div>
+      <p class="text-[10px] font-bold text-primary uppercase tracking-widest">WHERE IS MY BUS</p>
+      <h1 class="text-lg font-black leading-tight">Driver Portal</h1>
+    </div>
+  </div>
+  <a href="../login_page/code.html" class="text-sm text-slate-500 hover:text-primary flex items-center gap-1">
+    <span class="material-symbols-outlined text-base">arrow_back</span> Back to Login
+  </a>
+</header>
+
+<main class="max-w-lg mx-auto px-4 py-8">
+
+  <!-- Tab switcher -->
+  <div class="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-8">
+    <button id="tab-login" onclick="showTab('login')"
+      class="flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white">
+      Driver Login
+    </button>
+    <button id="tab-register" onclick="showTab('register')"
+      class="flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400">
+      Register as Driver
+    </button>
+    <button id="tab-dashboard" onclick="showTab('dashboard')"
+      class="flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hidden">
+      My Dashboard
+    </button>
+  </div>
+
+  <!-- ── DRIVER LOGIN ── -->
+  <div id="panel-login">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <h2 class="text-xl font-bold mb-1">Welcome back, Driver</h2>
+      <p class="text-slate-500 text-sm mb-6">Sign in to start sharing your location with passengers.</p>
+
+      <form id="driver-login-form" class="space-y-4">
+        <div id="dl-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"></div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+          <input id="dl-email" type="email" placeholder="Registered email"
+            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+          <input id="dl-password" type="password" placeholder="Password"
+            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+        </div>
+        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl min-h-[44px] flex items-center justify-center gap-2">
+          Sign In <span class="material-symbols-outlined">login</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── DRIVER REGISTER ── -->
+  <div id="panel-register" class="hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <h2 class="text-xl font-bold mb-1">Join as a Driver</h2>
+      <p class="text-slate-500 text-sm mb-6">Register your vehicle and start earning. Upload your documents to get verified.</p>
+
+      <form id="driver-reg-form" class="space-y-4">
+        <div id="dr-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"></div>
+        <div id="dr-success" class="hidden bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl"></div>
+
+        <input id="dr-name" type="text" placeholder="Full name"
+          class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+        <input id="dr-email" type="email" placeholder="Email address"
+          class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+        <input id="dr-phone" type="tel" placeholder="Phone number"
+          class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+        <input id="dr-route" type="text" placeholder="Bus route number (e.g. 534)"
+          class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+        <input id="dr-password" type="password" placeholder="Create password (min 6 chars)"
+          class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+
+        <!-- Document uploads -->
+        <div class="space-y-3 pt-2">
+          <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Upload Documents</p>
+
+          <!-- Profile photo -->
+          <label class="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+            <span class="material-symbols-outlined text-primary">account_circle</span>
+            <div class="flex-1">
+              <p class="text-sm font-semibold">Profile Photo</p>
+              <p class="text-xs text-slate-400" id="photo-label">Click to upload (JPG/PNG)</p>
+            </div>
+            <input id="dr-photo" type="file" accept="image/*" class="hidden" onchange="previewFile(this,'photo-label','photo-preview')"/>
+          </label>
+          <img id="photo-preview" class="hidden w-16 h-16 rounded-full object-cover border-2 border-primary ml-2"/>
+
+          <!-- Driving Licence -->
+          <label class="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+            <span class="material-symbols-outlined text-primary">badge</span>
+            <div class="flex-1">
+              <p class="text-sm font-semibold">Driving Licence (DL)</p>
+              <p class="text-xs text-slate-400" id="dl-label">Click to upload (JPG/PNG/PDF)</p>
+            </div>
+            <input id="dr-dl" type="file" accept="image/*,.pdf" class="hidden" onchange="previewFile(this,'dl-label',null)"/>
+          </label>
+
+          <!-- RC Book -->
+          <label class="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+            <span class="material-symbols-outlined text-primary">directions_bus</span>
+            <div class="flex-1">
+              <p class="text-sm font-semibold">RC Book (Vehicle Registration)</p>
+              <p class="text-xs text-slate-400" id="rc-label">Click to upload (JPG/PNG/PDF)</p>
+            </div>
+            <input id="dr-rc" type="file" accept="image/*,.pdf" class="hidden" onchange="previewFile(this,'rc-label',null)"/>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl min-h-[44px] flex items-center justify-center gap-2">
+          Submit Registration <span class="material-symbols-outlined">send</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── DRIVER DASHBOARD ── -->
+  <div id="panel-dashboard" class="hidden space-y-4">
+
+    <!-- Driver card -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex items-center gap-4">
+      <img id="dash-photo" src="" alt="Driver" class="w-16 h-16 rounded-full object-cover border-2 border-primary bg-slate-200"/>
+      <div>
+        <p class="font-black text-lg" id="dash-name">Driver</p>
+        <p class="text-sm text-slate-500" id="dash-email"></p>
+        <span class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">Verified Driver</span>
+      </div>
+    </div>
+
+    <!-- Location sharing toggle -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-bold text-lg">Location Sharing</h3>
+          <p class="text-sm text-slate-500">Passengers see your bus in real time when this is ON</p>
+        </div>
+        <button id="location-toggle" onclick="toggleLocation()"
+          class="relative w-14 h-7 rounded-full transition-colors bg-slate-200 dark:bg-slate-700 focus:outline-none">
+          <span id="toggle-knob" class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform"></span>
+        </button>
+      </div>
+
+      <div id="location-status" class="flex items-center gap-2 text-sm text-slate-500">
+        <span class="size-2 rounded-full bg-slate-300"></span>
+        Location sharing is OFF
+      </div>
+
+      <div id="location-coords" class="hidden mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-xs text-green-700 dark:text-green-300 font-mono"></div>
+    </div>
+
+    <!-- Route info -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <h3 class="font-bold mb-3">My Route</h3>
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-black text-lg" id="dash-route">—</div>
+        <div>
+          <p class="font-semibold text-sm">Bus Route</p>
+          <p class="text-xs text-slate-500">Assigned route number</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passengers count (live from backend) -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <h3 class="font-bold mb-3">Live Stats</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center">
+          <p class="text-2xl font-black text-primary" id="stat-passengers">—</p>
+          <p class="text-xs text-slate-500 mt-1">Passengers on board</p>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center">
+          <p class="text-2xl font-black text-primary" id="stat-eta">—</p>
+          <p class="text-xs text-slate-500 mt-1">ETA to next stop (min)</p>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="driverLogout()"
+      class="w-full border border-red-200 text-red-600 hover:bg-red-50 font-bold py-3 rounded-xl min-h-[44px] flex items-center justify-center gap-2 transition-colors">
+      <span class="material-symbols-outlined">logout</span> Sign Out
+    </button>
+  </div>
+
+</main>
+
+<script>
+  (function(){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.matches) document.documentElement.classList.add('dark');
+    mq.addEventListener('change', e => document.documentElement.classList.toggle('dark', e.matches));
+  })();
+
+  function showTab(t) {
+    ['login','register','dashboard'].forEach(id => {
+      document.getElementById('panel-' + id).classList.toggle('hidden', id !== t);
+      const btn = document.getElementById('tab-' + id);
+      if (btn) btn.className = id === t
+        ? 'flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white'
+        : 'flex-1 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400';
+    });
+  }
+
+  function previewFile(input, labelId, previewId) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById(labelId).textContent = file.name;
+    if (previewId) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.getElementById(previewId);
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Location sharing state
+  let locationOn = false;
+  let watchId = null;
+  let currentSession = null;
+
+  function toggleLocation() {
+    if (!locationOn) startLocation();
+    else stopLocation();
+  }
+
+  function startLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(pos => {
+      locationOn = true;
+      updateToggleUI(true);
+      shareLocation(pos.coords.latitude, pos.coords.longitude);
+      watchId = navigator.geolocation.watchPosition(
+        p => shareLocation(p.coords.latitude, p.coords.longitude),
+        () => {},
+        { enableHighAccuracy: true, maximumAge: 3000 }
+      );
+    }, () => {
+      alert('Location permission denied. Please allow location access.');
+    });
+  }
+
+  function stopLocation() {
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    locationOn = false;
+    watchId = null;
+    updateToggleUI(false);
+    document.getElementById('location-coords').classList.add('hidden');
+  }
+
+  function updateToggleUI(on) {
+    const btn = document.getElementById('location-toggle');
+    const knob = document.getElementById('toggle-knob');
+    const status = document.getElementById('location-status');
+    btn.style.background = on ? '#ec5b13' : '';
+    knob.style.transform = on ? 'translateX(28px)' : '';
+    status.innerHTML = on
+      ? '<span class="size-2 rounded-full bg-green-500 animate-pulse"></span> Location sharing is LIVE — passengers can see you'
+      : '<span class="size-2 rounded-full bg-slate-300"></span> Location sharing is OFF';
+  }
+
+  function shareLocation(lat, lng) {
+    if (!currentSession) return;
+
+    // POST to backend for cross-device real-time tracking
+    fetch('http://localhost:8000/driver/location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: currentSession.id,
+        lat,
+        lng,
+        route: currentSession.route || '',
+        name: currentSession.name || '',
+        ts: Date.now(),
+      }),
+    }).catch(() => {}); // silent fail — keep sharing even if backend is briefly down
+
+    // Also write to localStorage as fallback for same-device viewing
+    const locs = JSON.parse(localStorage.getItem('wimb_driver_locations') || '{}');
+    locs[currentSession.id] = { lat, lng, ts: Date.now(), route: currentSession.route, name: currentSession.name };
+    localStorage.setItem('wimb_driver_locations', JSON.stringify(locs));
+
+    const el = document.getElementById('location-coords');
+    el.textContent = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)} — updated ${new Date().toLocaleTimeString()}`;
+    el.classList.remove('hidden');
+  }
+
+  function driverLogout() {
+    stopLocation();
+    localStorage.removeItem('wimb_session');
+    showTab('login');
+    document.getElementById('tab-dashboard').classList.add('hidden');
+  }
+
+  // Check if already logged in as driver
+  const sess = JSON.parse(localStorage.getItem('wimb_session') || 'null');
+  if (sess && sess.role === 'driver') {
+    loadDashboard(sess);
+  }
+
+  function loadDashboard(session) {
+    currentSession = session;
+    document.getElementById('tab-dashboard').classList.remove('hidden');
+    showTab('dashboard');
+    document.getElementById('dash-name').textContent = session.name;
+    document.getElementById('dash-email').textContent = session.email;
+    document.getElementById('dash-route').textContent = session.route || '—';
+    if (session.photo) document.getElementById('dash-photo').src = session.photo;
+    // Poll backend for live stats
+    pollStats(session.route);
+    setInterval(() => pollStats(session.route), 5000);
+  }
+
+  async function pollStats(route) {
+    try {
+      const res = await fetch('http://localhost:8000/buses');
+      const buses = await res.json();
+      const match = buses.find(b => b.route === route);
+      if (match) {
+        document.getElementById('stat-passengers').textContent = match.passengers;
+        document.getElementById('stat-eta').textContent = match.eta;
+      }
+    } catch {}
+  }
+</script>
+
+<script type="module">
+  import { loginUser, registerUser, saveSession } from '../shared/auth.js';
+
+  // ── Driver Login ──────────────────────────────────────────────────────────
+  document.getElementById('driver-login-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const email    = document.getElementById('dl-email').value.trim();
+    const password = document.getElementById('dl-password').value;
+    const errEl    = document.getElementById('dl-error');
+    errEl.classList.add('hidden');
+
+    const result = loginUser(email, password);
+    if (!result.ok) {
+      errEl.textContent = result.error;
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (result.user.role !== 'driver') {
+      errEl.textContent = 'This account is not registered as a driver. Use the passenger login instead.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const session = saveSession(result.user, false);
+    session.route = result.user.route || '';
+    localStorage.setItem('wimb_session', JSON.stringify(session));
+    loadDashboard(session);
+  });
+
+  // ── Driver Registration ───────────────────────────────────────────────────
+  document.getElementById('driver-reg-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const errEl = document.getElementById('dr-error');
+    const okEl  = document.getElementById('dr-success');
+    errEl.classList.add('hidden');
+    okEl.classList.add('hidden');
+
+    const name     = document.getElementById('dr-name').value.trim();
+    const email    = document.getElementById('dr-email').value.trim();
+    const phone    = document.getElementById('dr-phone').value.trim();
+    const route    = document.getElementById('dr-route').value.trim();
+    const password = document.getElementById('dr-password').value;
+    const photoFile = document.getElementById('dr-photo').files[0];
+    const dlFile    = document.getElementById('dr-dl').files[0];
+    const rcFile    = document.getElementById('dr-rc').files[0];
+
+    if (!name || !email || !phone || !route || !password) {
+      errEl.textContent = 'Please fill in all required fields.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (password.length < 6) {
+      errEl.textContent = 'Password must be at least 6 characters.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    if (!photoFile || !dlFile || !rcFile) {
+      errEl.textContent = 'Please upload your profile photo, DL, and RC book.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    // Read files as base64
+    const toBase64 = f => new Promise(res => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.readAsDataURL(f);
+    });
+
+    const [photo, dl, rc] = await Promise.all([toBase64(photoFile), toBase64(dlFile), toBase64(rcFile)]);
+
+    const result = registerUser({ name, email, phone, route, password, role: 'driver', photo, dl, rc, city: 'Delhi' });
+    if (!result.ok) {
+      errEl.textContent = result.error;
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    okEl.textContent = 'Registration submitted! You can now sign in as a driver.';
+    okEl.classList.remove('hidden');
+    document.getElementById('driver-reg-form').reset();
+    document.getElementById('photo-preview').classList.add('hidden');
+    setTimeout(() => showTab('login'), 2000);
+  });
+</script>
+</body>
+</html>

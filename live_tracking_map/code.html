@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>WHERE IS MY BUS — Live Tracking</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ec5b13",
+            "background-light": "#f8f6f6",
+            "background-dark": "#221610",
+          },
+          fontFamily: {
+            "display": ["Public Sans", "sans-serif"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Public Sans', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .map-gradient-overlay {
+      background: linear-gradient(to right, rgba(248, 246, 246, 0.9) 0%, rgba(248, 246, 246, 0) 100%);
+    }
+
+    .dark .map-gradient-overlay {
+      background: linear-gradient(to right, rgba(34, 22, 16, 0.9) 0%, rgba(34, 22, 16, 0) 100%);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-200">
+  <div class="relative flex h-screen w-full flex-col overflow-hidden">
+    <header
+      class="z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center size-10 rounded-xl bg-primary text-white">
+          <span class="material-symbols-outlined">directions_bus</span>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold leading-tight tracking-tight">WHERE IS MY BUS</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Fleet Management
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-1 justify-center max-w-xl mx-8">
+        <div class="relative w-full">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+          <input
+            class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/50 text-sm"
+            placeholder="Search routes, vehicles or stops..." type="text" />
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div id="profile-menu-container"></div>
+      </div>
+    </header>
+    <main class="flex flex-1 overflow-hidden relative">
+      <aside
+        class="z-40 w-64 flex flex-col border-r border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark">
+        <nav class="flex-1 p-4 flex flex-col gap-2">
+          <div class="px-2 py-3 mb-2">
+            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Navigation
+            </p>
+          </div>
+          <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/20"
+            href="../live_tracking_map/code.html">
+            <span class="material-symbols-outlined">map</span>
+            <span class="text-sm font-semibold">Live Tracking</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            href="../route_overview/code.html">
+            <span class="material-symbols-outlined text-slate-500">history</span>
+            <span class="text-sm font-medium">Route History</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            href="../user_dashboard/code.html">
+            <span class="material-symbols-outlined text-slate-500">analytics</span>
+            <span class="text-sm font-medium">Analytics</span>
+          </a>
+          <div class="px-2 py-3 mt-6 mb-2">
+            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Active Fleet
+            </p>
+          </div>
+          <div id="fleet-list" class="flex flex-col gap-1 overflow-y-auto max-h-64">
+            <!-- populated by JS -->
+          </div>
+        </nav>
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+          <div class="bg-primary/10 dark:bg-primary/5 p-4 rounded-xl">
+            <p class="text-xs font-bold text-primary mb-1">System Health</p>
+            <div class="flex items-center gap-2 text-[10px] text-slate-600 dark:text-slate-400">
+              <span class="size-1.5 rounded-full bg-green-500"></span>
+              All systems operational
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="flex-1 relative bg-slate-200 dark:bg-slate-900">
+        <div id="map" class="absolute inset-0 z-0"></div>
+
+        <div class="absolute inset-y-0 left-0 w-32 map-gradient-overlay pointer-events-none"></div>
+        <div class="absolute bottom-8 left-8 z-30 w-full max-w-md">
+          <div
+            class="bg-background-light dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 overflow-hidden relative">
+            <div class="absolute top-0 right-0 p-4">
+              <div
+                class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                <span class="size-1 bg-green-500 rounded-full animate-ping"></span>
+                LIVE
+              </div>
+            </div>
+            <div class="flex flex-col gap-1 mb-4">
+              <p class="text-primary font-bold text-xs uppercase tracking-widest">Currently Tracking</p>
+              <h3 class="route-number text-2xl font-bold">Route 534 <span
+                  class="text-slate-400 font-normal ml-2">DL-1PC-4210</span></h3>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div
+                class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                <p class="text-xs text-slate-500 mb-1">Next Stop</p>
+                <p class="next-stop text-sm font-bold">Nehru Place</p>
+              </div>
+              <div
+                class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                <p class="text-xs text-slate-500 mb-1">Est. Arrival</p>
+                <p class="eta-value text-sm font-bold text-primary">12 mins</p>
+              </div>
+              <div
+                class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                <p class="text-xs text-slate-500 mb-1">Current Speed</p>
+                <p class="current-speed text-sm font-bold">— km/h</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between items-end">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm text-slate-400">group</span>
+                  <p class="text-sm font-medium">Passengers</p>
+                </div>
+                <p class="text-sm font-bold occupancy-text">— <span class="text-xs font-normal text-slate-500 occupancy-sub"></span></p>
+              </div>
+              <div class="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full occupancy-bar" style="width: 0%"></div>
+              </div>
+              <p class="text-[11px] text-slate-500 italic occupancy-label">Loading...</p>
+            </div>
+            <div class="mt-6 flex gap-3">
+              <button
+                class="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 text-sm shadow-lg shadow-primary/25 min-h-[44px]"
+                onclick="window.location.href='../stop_details_eta/code.html'">
+                <span class="material-symbols-outlined text-sm">visibility</span>
+                Full Details
+              </button>
+              <button
+                class="px-4 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-400">share</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="absolute top-8 right-8 z-30 flex flex-col gap-2">
+          <button data-action="my-location"
+            class="bg-background-light dark:bg-background-dark p-3 rounded-xl shadow-xl hover:bg-slate-50 transition-colors border border-slate-200 dark:border-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <span class="material-symbols-outlined">my_location</span>
+          </button>
+          <div
+            class="flex flex-col bg-background-light dark:bg-background-dark rounded-xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+            <button
+              class="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-100 dark:border-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center">
+              <span class="material-symbols-outlined">add</span>
+            </button>
+            <button class="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+              <span class="material-symbols-outlined">remove</span>
+            </button>
+          </div>
+          <button
+            class="bg-background-light dark:bg-background-dark p-3 rounded-xl shadow-xl hover:bg-slate-50 transition-colors border border-slate-200 dark:border-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <span class="material-symbols-outlined">layers</span>
+          </button>
+        </div>
+        <div class="absolute top-8 left-8 z-30">
+          <div
+            class="bg-background-light dark:bg-background-dark/90 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-lg flex items-center gap-3">
+            <div class="size-2 rounded-full bg-primary"></div>
+            <p class="text-xs font-semibold">Active: Route 534 Tracking</p>
+            <div class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700"></div>
+            <button class="text-xs font-bold text-slate-500 hover:text-primary transition-colors">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- Bottom Navigation for Mobile -->
+  <nav class="md:hidden sticky bottom-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark py-3 px-6 flex justify-around items-center z-50">
+    <a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../user_dashboard/code.html">
+      <span class="material-symbols-outlined">home</span>
+      <span class="text-[10px] font-bold">Home</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-primary min-h-[44px] min-w-[44px] justify-center" href="../live_tracking_map/code.html">
+      <span class="material-symbols-outlined">map</span>
+      <span class="text-[10px] font-bold">Map</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../bus_search/code.html">
+      <span class="material-symbols-outlined">directions_bus</span>
+      <span class="text-[10px] font-bold">Buses</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-slate-400 min-h-[44px] min-w-[44px] justify-center" href="../login_page/code.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-bold">Profile</span>
+    </a>
+  </nav>
+  <script type="module">
+    import { initProfileMenu } from '../shared/header.js';
+
+    // Dark/light theme
+    (function applyTheme() {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mq.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+      mq.addEventListener('change', e => {
+        if (e.matches) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      });
+    })();
+
+    initProfileMenu();
+
+    // ── Route waypoints (mirrors backend — street-accurate) ────────────────
+    const ROUTE_WAYPOINTS = {
+      "534": [[28.6671,77.2281],[28.6636,77.2290],[28.6590,77.2295],[28.6554,77.2310],[28.6510,77.2320],[28.6472,77.2330],[28.6430,77.2295],[28.6380,77.2270],[28.6340,77.2240],[28.6310,77.2220],[28.6280,77.2200],[28.6250,77.2190],[28.6210,77.2180],[28.6139,77.2090],[28.6080,77.2100],[28.6020,77.2110],[28.5970,77.2120],[28.5900,77.2130],[28.5840,77.2100],[28.5700,77.2050],[28.5600,77.2030],[28.5494,77.2001]],
+      "429": [[28.6469,77.3152],[28.6460,77.3050],[28.6445,77.2950],[28.6430,77.2850],[28.6415,77.2750],[28.6400,77.2650],[28.6380,77.2550],[28.6350,77.2450],[28.6320,77.2350],[28.6280,77.2200],[28.6340,77.2190],[28.6350,77.2100],[28.6360,77.2000],[28.6370,77.1900],[28.6350,77.1800],[28.6330,77.1700],[28.6300,77.1600],[28.6270,77.1500],[28.6240,77.1400],[28.6210,77.1300],[28.6100,77.1150],[28.5921,77.0460]],
+      "522": [[28.5672,77.2100],[28.5700,77.2050],[28.5730,77.2000],[28.5760,77.1950],[28.5800,77.1900],[28.5840,77.1850],[28.5870,77.1800],[28.5880,77.1750],[28.5870,77.1700],[28.5820,77.1650],[28.5750,77.1600],[28.5650,77.1550],[28.5550,77.1500],[28.5450,77.1550],[28.5350,77.1600],[28.5250,77.1700],[28.5200,77.1800]],
+      "724": [[28.6671,77.2281],[28.6700,77.2350],[28.6720,77.2450],[28.6730,77.2550],[28.6720,77.2650],[28.6700,77.2750],[28.6680,77.2850],[28.6660,77.2950],[28.6640,77.3050],[28.6620,77.3150],[28.6600,77.3250],[28.6580,77.3350],[28.6560,77.3450],[28.6540,77.3550]],
+      "OM-4":[[28.5200,77.1870],[28.5150,77.1950],[28.5100,77.2050],[28.5050,77.2150],[28.5000,77.2250],[28.4950,77.2350],[28.4900,77.2450],[28.4850,77.2550],[28.4800,77.2650],[28.4750,77.2750],[28.4700,77.2850],[28.4650,77.2950]],
+      "614": [[28.7495,77.0680],[28.7450,77.0750],[28.7400,77.0850],[28.7350,77.0950],[28.7300,77.1050],[28.7250,77.1150],[28.7200,77.1250],[28.7150,77.1350],[28.7100,77.1450],[28.7050,77.1550],[28.7000,77.1650],[28.6950,77.1750],[28.6900,77.1850],[28.6850,77.1950],[28.6800,77.2050],[28.6750,77.2150],[28.6671,77.2281]],
+      "302": [[28.6270,77.3650],[28.6250,77.3550],[28.6230,77.3450],[28.6210,77.3350],[28.6190,77.3250],[28.6170,77.3150],[28.6150,77.3050],[28.6130,77.2950],[28.6110,77.2850],[28.6100,77.2750],[28.6110,77.2650],[28.6120,77.2550],[28.6139,77.2450],[28.6200,77.2350],[28.6250,77.2280],[28.6300,77.2250]],
+      "881": [[28.4950,77.0900],[28.4920,77.0870],[28.4890,77.0840],[28.4860,77.0810],[28.4830,77.0780],[28.4800,77.0750],[28.4770,77.0720],[28.4740,77.0690],[28.4710,77.0660],[28.4680,77.0630],[28.4650,77.0600]],
+      "77":  [[28.6700,77.2900],[28.6680,77.2850],[28.6660,77.2800],[28.6640,77.2750],[28.6620,77.2700],[28.6600,77.2650],[28.6580,77.2600],[28.6560,77.2550],[28.6540,77.2500],[28.6520,77.2450],[28.6500,77.2400],[28.6480,77.2350],[28.6460,77.2300],[28.6440,77.2250]],
+      "19":  [[28.6150,77.0580],[28.6180,77.0680],[28.6210,77.0780],[28.6240,77.0880],[28.6270,77.0980],[28.6300,77.1080],[28.6330,77.1180],[28.6360,77.1280],[28.6390,77.1380],[28.6420,77.1480],[28.6450,77.1580],[28.6480,77.1680]],
+    };
+
+    // Distinct colours per route
+    const ROUTE_COLORS = {
+      "534":"#ec5b13","429":"#3b82f6","522":"#10b981","724":"#8b5cf6",
+      "OM-4":"#f59e0b","614":"#ef4444","302":"#06b6d4","881":"#84cc16",
+      "77":"#f97316","19":"#a855f7"
+    };
+
+    // ── Map init ────────────────────────────────────────────────────────────
+    const map = L.map('map').setView([28.6139, 77.2090], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Draw route polylines
+    Object.entries(ROUTE_WAYPOINTS).forEach(([route, pts]) => {
+      L.polyline(pts, {
+        color: ROUTE_COLORS[route] || '#64748b',
+        weight: 3,
+        opacity: 0.55,
+        dashArray: '6 4'
+      }).addTo(map);
+    });
+
+    let markers = {};
+    let selectedBusId = null;
+    let lastBusData = {};
+
+    function makeBusIcon(route) {
+      const color = ROUTE_COLORS[route] || '#64748b';
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="16" fill="${color}" stroke="white" stroke-width="2.5"/>
+        <text x="18" y="23" text-anchor="middle" font-size="10" font-weight="bold" fill="white" font-family="sans-serif">${route}</text>
+      </svg>`;
+      return L.divIcon({
+        html: svg,
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+      });
+    }
+
+    // ── Connection lost banner ──────────────────────────────────────────────
+    function showConnectionLostBanner() {
+      let b = document.getElementById('connection-lost-banner');
+      if (!b) {
+        b = document.createElement('div');
+        b.id = 'connection-lost-banner';
+        b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#ef4444;color:#fff;text-align:center;padding:8px 16px;font-size:14px;font-weight:600';
+        b.textContent = 'Connection lost — showing last known positions';
+        document.body.appendChild(b);
+      }
+    }
+    function hideConnectionLostBanner() {
+      document.getElementById('connection-lost-banner')?.remove();
+    }
+
+    // ── Polling ─────────────────────────────────────────────────────────────
+    async function updateBuses() {
+      try {
+        const res = await fetch('http://localhost:8000/buses');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buses = await res.json();
+
+        const busMap = {};
+        buses.forEach(b => { busMap[String(b.id)] = b; });
+
+        // Remove stale markers
+        const incoming = new Set(Object.keys(busMap));
+        Object.keys(markers).forEach(id => {
+          if (!incoming.has(id)) { markers[id].remove(); delete markers[id]; }
+        });
+
+        // Add / move markers
+        incoming.forEach(id => {
+          const bus = busMap[id];
+          const pos = [bus.lat, bus.lng];
+          if (!markers[id]) {
+            markers[id] = L.marker(pos, { icon: makeBusIcon(bus.route) }).addTo(map);
+            markers[id].on('click', () => {
+              selectedBusId = id;
+              updateInfoPanel(busMap[id]);
+            });
+          } else {
+            markers[id].setLatLng(pos);
+          }
+        });
+
+        lastBusData = busMap;
+        hideConnectionLostBanner();
+
+        // Update fleet sidebar
+        updateFleetList(Object.values(busMap));
+
+        // Update info panel
+        const active = busMap[selectedBusId] || busMap[Object.keys(busMap)[0]];
+        if (active) updateInfoPanel(active);
+
+      } catch (err) {
+        console.error('Fetch failed:', err);
+        showConnectionLostBanner();
+      }
+    }
+
+    // ── Info panel ──────────────────────────────────────────────────────────
+    function updateInfoPanel(bus) {
+      const cap = bus.capacity || 65;
+      const pax = bus.passengers ?? 0;
+      const pct = Math.round((pax / cap) * 100);
+      const label = pct >= 85 ? 'High demand — limited seats' :
+                    pct >= 55 ? 'Moderate capacity' : 'Plenty of seats available';
+
+      document.querySelector('.route-number').textContent  = 'Route ' + bus.route;
+      document.querySelector('.next-stop').textContent     = bus.next_stop ?? '—';
+      document.querySelector('.eta-value').textContent     = bus.eta != null ? bus.eta + ' mins' : '—';
+      document.querySelector('.current-speed').textContent = bus.speed != null ? bus.speed + ' km/h' : '—';
+      document.querySelector('.occupancy-text').childNodes[0].textContent = `${pct}% `;
+      document.querySelector('.occupancy-sub').textContent = `(${pax}/${cap})`;
+      document.querySelector('.occupancy-bar').style.width = pct + '%';
+      document.querySelector('.occupancy-label').textContent = label;
+
+      // Colour bar by load
+      const bar = document.querySelector('.occupancy-bar');
+      bar.style.background = pct >= 85 ? '#ef4444' : pct >= 55 ? '#ec5b13' : '#10b981';
+    }
+
+    // ── Fleet sidebar ───────────────────────────────────────────────────────
+    function updateFleetList(buses) {
+      const list = document.getElementById('fleet-list');
+      if (!list) return;
+      // Group by route
+      const byRoute = {};
+      buses.forEach(b => {
+        if (!byRoute[b.route]) byRoute[b.route] = [];
+        byRoute[b.route].push(b);
+      });
+      list.innerHTML = Object.entries(byRoute).map(([route, bs]) => {
+        const color = ROUTE_COLORS[route] || '#64748b';
+        return `<div class="px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer"
+                     onclick="window._selectRoute('${route}')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="size-2 rounded-full" style="background:${color}"></span>
+              <span class="text-sm font-medium">Route ${route}</span>
+            </div>
+            <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">${bs.length} bus${bs.length > 1 ? 'es' : ''}</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-0.5 ml-4">${bs[0].next_stop}</p>
+        </div>`;
+      }).join('');
+    }
+
+    window._selectRoute = (route) => {
+      const bus = Object.values(lastBusData).find(b => b.route === route);
+      if (bus) {
+        selectedBusId = String(bus.id);
+        updateInfoPanel(bus);
+        map.setView([bus.lat, bus.lng], 14);
+      }
+    };
+
+    // ── My Location ─────────────────────────────────────────────────────────
+    document.querySelector('button[data-action="my-location"]')?.addEventListener('click', () => {
+      if (!navigator.geolocation) { showToast('Geolocation not supported.'); return; }
+      navigator.geolocation.getCurrentPosition(
+        p => map.setView([p.coords.latitude, p.coords.longitude], 15),
+        () => showToast('Location access denied or unavailable.')
+      );
+    });
+
+    function showToast(text) {
+      let t = document.getElementById('geo-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'geo-toast';
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:#1e293b;color:#f1f5f9;border-radius:12px;padding:12px 18px;font-size:13px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.3)';
+        document.body.appendChild(t);
+      }
+      t.textContent = text;
+      clearTimeout(t._t);
+      t._t = setTimeout(() => t.remove(), 5000);
+    }
+
+    // ── Zoom buttons ────────────────────────────────────────────────────────
+    document.querySelectorAll('button .material-symbols-outlined').forEach(el => {
+      if (el.textContent === 'add') el.closest('button').onclick = () => map.zoomIn();
+      if (el.textContent === 'remove') el.closest('button').onclick = () => map.zoomOut();
+    });
+
+    // Start
+    updateBuses();
+    setInterval(updateBuses, 3000);
+
+    // ── Show live driver GPS markers (backend + localStorage fallback) ────────
+    let driverMarkers = {};
+
+    async function updateDriverMarkers() {
+      let locs = {};
+
+      // Primary: fetch from backend (works cross-device)
+      try {
+        const res = await fetch('http://localhost:8000/driver/locations');
+        if (res.ok) locs = await res.json();
+      } catch {}
+
+      // Merge localStorage (same-device fallback)
+      try {
+        const local = JSON.parse(localStorage.getItem('wimb_driver_locations') || '{}');
+        Object.assign(locs, local);
+      } catch {}
+
+      const now = Date.now();
+
+      // Remove stale markers (>30s)
+      Object.keys(driverMarkers).forEach(id => {
+        if (!locs[id] || now - locs[id].ts > 30000) {
+          driverMarkers[id].remove();
+          delete driverMarkers[id];
+        }
+      });
+
+      // Add / move driver markers
+      Object.entries(locs).forEach(([id, loc]) => {
+        if (now - loc.ts > 30000) return;
+        const pos = [loc.lat, loc.lng];
+        const icon = L.divIcon({
+          html: `<div style="background:#10b981;border:3px solid white;border-radius:50%;width:22px;height:22px;box-shadow:0 0 0 5px rgba(16,185,129,.25);display:flex;align-items:center;justify-content:center;">
+                   <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                 </div>`,
+          className: '',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+        });
+        if (!driverMarkers[id]) {
+          driverMarkers[id] = L.marker(pos, { icon, zIndexOffset: 1000 }).addTo(map);
+          driverMarkers[id].bindPopup(
+            `<div style="font-family:sans-serif;min-width:140px">
+               <p style="font-weight:700;margin:0 0 2px">🚌 Live Driver</p>
+               <p style="margin:0;color:#ec5b13;font-weight:600">Route ${loc.route || '?'}</p>
+               <p style="margin:2px 0 0;font-size:12px;color:#64748b">${loc.name || 'Driver'}</p>
+             </div>`
+          );
+        } else {
+          driverMarkers[id].setLatLng(pos);
+        }
+      });
+    }
+
+    setInterval(updateDriverMarkers, 2000);
+    updateDriverMarkers();
+  </script>
+</body>
+
+</html>
